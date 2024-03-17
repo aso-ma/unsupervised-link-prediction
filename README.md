@@ -3,4 +3,4 @@ A Python implementation for calculating AUC and Precision as evaluation metrics 
 
 $$\mathrm{AUC} = \frac{n^{\prime} + 0.5n^{\prime\prime}}{n}$$
 
-$$\mathrm{Precision} = \frac{L_r}{L}, \text{where } L \text{is the top predicted links} $$
+$$\mathrm{Precision} = \frac{L_r}{L}, \text{where } L \text{ is the top predicted links} $$
