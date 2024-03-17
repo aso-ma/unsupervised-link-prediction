@@ -37,8 +37,31 @@ def auc(graph, score_function, n=100):
             n_prime+=1
         if score1 == score2:    
             n_double_prime+=1
-    return (n_prime + (0.5*n_double_prime))/n     
+    return (n_prime + (0.5*n_double_prime))/n
+
+def link_prediction(graph, scoring_function):
+    scored_links = [] 
+    for v, u in nx.non_edges(graph):
+        scored_links.append(
+            (
+                v, u, scoring_function(graph, (v, u))
+            )
+        )  
+    return scored_links
+
+def precision(test_graph, scored_links):
+    n = test_graph.number_of_nodes()
+    scored_links.sort(key=lambda e:e[2], reverse=True)
+    count = sum(
+        1
+        for node1, node2, _ in scored_links[:n]
+        if test_graph.has_edge(node1, node2)
+    )
+    return (count*100)/n
 
 if __name__ == '__main__':
     g_karate = nx.karate_club_graph()
-    print(auc(g_karate, __preferential_attachment))
+    g_train, g_test = __train_test_split(g_karate)
+    scored_links = link_prediction(g_train, __preferential_attachment)
+    print('Precis ->', precision(g_test, scored_links))
+    print('AUC ->', auc(g_karate, __preferential_attachment))
