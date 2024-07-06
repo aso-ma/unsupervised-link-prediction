@@ -7,11 +7,11 @@ __`import` statements__:
 from scoring_function import preferential_attachment
 from data_splitting import k_fold_cross_validation, get_train_test_graphs_for, train_test_split
 from evaluation import auc, precision
-from link_prediction import edge_scoring, reverse_link_prediction, negative_link_prediction
+from link_prediction import edge_scoring, reverse_link_prediction
 from networkx import karate_club_graph
-
+from networkx import complement
 ```
-## Normal Link Prediction
+## Normal Link Prediction or Positive Link Prediction (PLP)
 ### Train Test Split
 
 ```
@@ -45,7 +45,7 @@ print('Precis ->', final_precision)
 print('AUC ->', final_auc)
 ```
 
-## Reverse Link Prediction
+## Reverse Link Prediction (RLP)
 ```
 g_karate = karate_club_graph()
 g_train, g_test = train_test_split(g_karate)
@@ -54,12 +54,13 @@ print('Precis ->', precision(g_test, scored_links))
 print('AUC ->', auc(g_karate, g_train, g_test, preferential_attachment))
 ```
 
-## Negative Link Prediction
-
+## Negative Link Prediction (NLP)
+The NLP approach works similarly to the PLP approach and applies PLP to the complement graph. First, the graph must be complemented, and after that, the PLP approach is applied.
 ```
 g_karate = karate_club_graph()
-g_train, g_test = train_test_split(g_karate)
-scored_links = negative_link_prediction(g_train, preferential_attachment)
+g_complemented = complement(graph)
+g_train, g_test = train_test_split(g_complemented)
+scored_links = edge_scoring(g_train, preferential_attachment)
 print('Precis ->', precision(g_test, scored_links))
-print('AUC ->', auc(g_karate, g_train, g_test, preferential_attachment))
+print('AUC ->', auc(g_complemented, g_train, g_test, preferential_attachment))
 ```
