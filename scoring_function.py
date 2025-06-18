@@ -1,4 +1,5 @@
 from math import log1p, sqrt
+from networkx import is_weighted
 
 def __get_common_neighbors(graph, v, u):
     neighbors_of_v = set(graph.neighbors(v))
@@ -7,6 +8,14 @@ def __get_common_neighbors(graph, v, u):
 def __get_union_neighbors(graph, v, u):
     neighbors_of_v = set(graph.neighbors(v))
     return neighbors_of_v.union(graph.neighbors(u))
+
+def __node_strength(graph, z):
+    if not is_weighted(graph):
+        return 0.0
+    return graph.degree(z, weight='weight') 
+
+def __get_edge_weight(graph, v, u):
+    return graph[v][u]['weight']  
 
 def preferential_attachment(graph, v, u):
     return graph.degree(v) * graph.degree(u)
@@ -67,14 +76,14 @@ def weighted_preferential_attachment(graph, v, u):
     common_neighbors = __get_common_neighbors(graph, v, u)
     s = 0
     for z in common_neighbors:
-        s += (graph.get_edge_weight(v, z) * graph.get_edge_weight(z, u))
+        s += (__get_edge_weight(graph, v, z) * __get_edge_weight(graph, z, u))
     return s 
   
 def weighted_common_neighbor(graph, v, u):
     common_neighbors = __get_common_neighbors(graph, v, u)
     s = 0
     for z in common_neighbors:
-        s += (graph.get_edge_weight(v, z) + graph.get_edge_weight(z, u))
+        s += (__get_edge_weight(graph, v, z) + __get_edge_weight(graph, z, u))
     return s 
 
 def weighted_adamic_adar(graph, v, u):
@@ -82,9 +91,8 @@ def weighted_adamic_adar(graph, v, u):
   s = 0
   for z in common_neighbors:
     s += (
-      (
-        graph.get_edge_weight(v, z) + graph.get_edge_weight(z, u)
-      ) / log1p(graph.node_strength(z))
+      (__get_edge_weight(graph, v, z) + __get_edge_weight(graph, z, u)) 
+      / log1p(__node_strength(graph, z))
     )
   return s
 
@@ -93,14 +101,14 @@ def weighted_adamic_adar(graph, v, u):
     s = 0
     for z in common_neighbors:
         s += (
-            (graph.get_edge_weight(v, z) + graph.get_edge_weight(z, u))
-            / log1p(graph.node_strength(z))
+            (__get_edge_weight(graph, v, z) + __get_edge_weight(graph, z, u))
+            / log1p(__node_strength(graph, z))
         )
     return s
 
 def weighted_jaccard(graph, v, u):
     s1 = weighted_common_neighbor(graph, v, u)
-    s2 = graph.node_strength(v) + graph.node_strength(u)
+    s2 = __node_strength(graph, v) + __node_strength(graph, u)
     return s1 / s2
 
 def weighted_resource_allocation(graph, v, u):
@@ -108,7 +116,7 @@ def weighted_resource_allocation(graph, v, u):
     s = 0
     for z in common_neighbors:
         s += (
-            (graph.get_edge_weight(v, z) + graph.get_edge_weight(z, u))
-            / graph.node_strength(z)
+            (__get_edge_weight(graph, v, z) + __get_edge_weight(graph, z, u))
+            / __node_strength(graph, z)
         )
     return s
